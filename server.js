@@ -2,7 +2,7 @@ const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const consoleTable = require("console.table");
 
-// Express middleware
+const start = require("./index.js");
 
 // Connect to database
 const db = mysql.createConnection(
@@ -17,16 +17,4 @@ const db = mysql.createConnection(
   console.log(`Connected to the 'employeeTracker_db' database.`)
 );
 
-// request to get all departments
-
-// request to view all roles
-
-// request to view all Employees
-
-// request to add a department?
-
-//  request to add a role
-
-// request to add an employee
-
-// Request to update employee role
+start(db);

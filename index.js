@@ -6,7 +6,7 @@ const start = (db) => {
       {
         type: "list",
         message: "What would you like to do?",
-        name: "license",
+        name: "selection",
         choices: [
           "View all departments",
           "View all roles",
@@ -21,20 +21,22 @@ const start = (db) => {
     .then((data) => {
       switch (data.selection) {
         // return all departments
-        case "view all departments":
-          db.query("sELECT * FROM departments", function (err, results) {
+        case "View all departments":
+          db.query("SELECT * FROM departments", function (err, results) {
             console.log(results);
             start(db);
           });
           break;
 
-        // return all Employees
-        case "view all departments":
-          db.query("sELECT * FROM departments", function (err, results) {
+        // return all roles
+        case "View all roles":
+          db.query("SELECT * FROM roles", function (err, results) {
             console.log(results);
             start(db);
           });
           break;
+
+        // return all employees
 
         // request to add a department?
 
@@ -46,16 +48,5 @@ const start = (db) => {
       }
     });
 };
-// request to get all departments
 
-// request to view all roles
-
-// request to view all Employees
-
-// request to add a department?
-
-//  request to add a role
-
-// request to add an employee
-
-// Request to update employee role
+module.exports = start;
