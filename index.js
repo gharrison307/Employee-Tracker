@@ -1,6 +1,20 @@
 const inquirer = require("inquirer");
+const mysql = require("mysql2");
+const consoleTable = require("console.table");
 
-const start = (db) => {
+const db = mysql.createConnection(
+  {
+    host: "localhost",
+    // MySQL username,
+    user: "root",
+    // TODO: Add MySQL password
+    password: "root",
+    database: "employeeTracker_db",
+  },
+  console.log(`Connected to the 'employeeTracker_db' database.`)
+);
+
+function start() {
   inquirer
     .prompt([
       {
@@ -15,6 +29,7 @@ const start = (db) => {
           "Add a role",
           "Add an employee",
           "Update an employee role",
+          "Exit",
         ],
       },
     ])
@@ -23,30 +38,83 @@ const start = (db) => {
         // return all departments
         case "View all departments":
           db.query("SELECT * FROM departments", function (err, results) {
-            console.log(results);
-            start(db);
+            console.table(results);
+            start();
           });
           break;
 
         // return all roles
         case "View all roles":
           db.query("SELECT * FROM roles", function (err, results) {
-            console.log(results);
-            start(db);
+            console.table(results);
+            start();
           });
           break;
 
         // return all employees
+        case "View all employees":
+          db.query("SELECT * FROM employees", function (err, results) {
+            console.table(results);
+            start();
+          });
+          break;
 
-        // request to add a department?
+        // Add a department
+        case "Add a department":
+          addDepartment();
+          break;
 
         //  request to add a role
-
+        case "Add a role":
+          addRole();
+          break;
         // request to add an employee
-
+        case "Add a department":
+          addDepartment();
+          break;
         // Request to update employee role
+        case "Update an employee role":
+          addDepartment();
+          break;
+
+        // exit the program
+        case "Exit":
+          exit();
+          break;
       }
+    });
+}
+
+// Add a department
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the name of the Department you would like to add?",
+        name: "departmentName",
+      },
+    ])
+    .then((input) => {
+      db.query(
+        "INSERT INTO departments (name) VALUES (?)",
+        input.departmentName,
+        (err, results) => {
+          if (err) {
+            throw err;
+          }
+          console.log(
+            "The new department called ${input.departmentName} has been added."
+          );
+          start();
+        }
+      );
     });
 };
 
+const exit = () => {
+  process.exit();
+};
+
+start();
 module.exports = start;
