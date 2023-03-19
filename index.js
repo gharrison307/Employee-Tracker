@@ -43,7 +43,7 @@ function start() {
           });
           break;
 
-        // return all roles
+        // Return all roles
         case "View all roles":
           db.query("SELECT * FROM roles", function (err, results) {
             console.table(results);
@@ -51,7 +51,7 @@ function start() {
           });
           break;
 
-        // return all employees
+        // Return all employees
         case "View all employees":
           db.query("SELECT * FROM employees", function (err, results) {
             console.table(results);
@@ -64,20 +64,20 @@ function start() {
           addDepartment();
           break;
 
-        //  request to add a role
+        // Add a role
         case "Add a role":
           addRole();
           break;
-        // request to add an employee
+        // Add an employee
         case "Add a department":
           addDepartment();
           break;
-        // Request to update employee role
+        // Update employee role
         case "Update an employee role":
           addDepartment();
           break;
 
-        // exit the program
+        // Exit the program
         case "Exit":
           exit();
           break;
@@ -85,7 +85,7 @@ function start() {
     });
 }
 
-// Add a department
+// Add a department function
 const addDepartment = () => {
   inquirer
     .prompt([
@@ -97,24 +97,61 @@ const addDepartment = () => {
     ])
     .then((input) => {
       db.query(
-        "INSERT INTO departments (name) VALUES (?)",
+        `INSERT INTO departments (name) VALUES (?)`,
         input.departmentName,
         (err, results) => {
           if (err) {
             throw err;
           }
-          console.log(
-            "The new department called ${input.departmentName} has been added."
-          );
+          console.log("The new department has been added.");
           start();
         }
       );
     });
 };
 
+// Add a role
+const addRole = () => {
+  db.query("SELECT id as value, name FROM departments", (err, results) => {
+    err ? console.log(err) : console.log("/n");
+
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What is the name of the Role you would like to add?",
+          name: "title",
+        },
+        {
+          type: "input",
+          message: "What is the salary of the new role?",
+          name: "salary",
+        },
+        {
+          type: "list",
+          message: "To which department does this new role belong?",
+          name: "departments_id",
+          choices: results,
+        },
+      ])
+      .then(({ title, salary, departments_id }) => {
+        db.query(
+          `INSERT INTO roles (title, salary, departments_id) VALUES ("${title}", "${salary}", "${departments_id}")`,
+          (err, results) => {
+            if (err) {
+              throw err;
+            }
+            console.log("The new role has been added.");
+            start();
+          }
+        );
+      });
+  });
+};
+
 const exit = () => {
   process.exit();
 };
 
-start();
+// start();
 module.exports = start;
