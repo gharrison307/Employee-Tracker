@@ -45,18 +45,24 @@ function start() {
 
         // Return all roles
         case "View all roles":
-          db.query("SELECT * FROM roles", function (err, results) {
-            console.table(results);
-            start();
-          });
+          db.query(
+            "SELECT roles.id, roles.title, roles.salary, departments.name as departments FROM roles JOIN departments ON roles.departments_id = departments.id",
+            function (err, results) {
+              console.table(results);
+              start();
+            }
+          );
           break;
 
         // Return all employees
         case "View all employees":
-          db.query("SELECT * FROM employees", function (err, results) {
-            console.table(results);
-            start();
-          });
+          db.query(
+            `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.name AS departments, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employees LEFT JOIN roles ON employees.roles_id = roles.id LEFT JOIN departments ON roles.departments_id = departments.id LEFT JOIN employees manager ON employees.manager_id = manager.id`,
+            function (err, results) {
+              console.table(results);
+              start();
+            }
+          );
           break;
 
         // Add a department
@@ -211,8 +217,54 @@ const addEmployee = () => {
 };
 
 // Update an Employee
-updateEmployee();
+const updateEmployee = () => {
+  // query employees
+  db.query(
+    `SELECT CONCAT(first_name, " ", last_name) AS name, id AS value FROM employees`,
+    (err, employeeResults) => {
+      console.log(employeeResults);
+      // query roles
+      db.query(
+        `SELECT id AS value, title AS name FROM roles`,
+        (err, rolesResults) => {
+          console.log(rolesResults);
 
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                message: "Which employee's role would you like to change?",
+                name: "id",
+                choices: employeeResults,
+              },
+              {
+                type: "list",
+                message:
+                  "To which department would you like to move this employee?",
+                name: "roles_id",
+                choices: rolesResults,
+              },
+            ])
+            .then(
+              ({ id, roles_id }) =>
+                db.query(
+                  `UPDATE employees SET roles_id VALUE ("${roles_id}"),)`
+                ),
+              (err, results) => {
+                if (err) {
+                  throw err;
+                }
+                console.log("The role has been updated.");
+                start();
+              }
+            );
+        }
+      );
+    }
+  );
+};
+
+// Exit function
 const exit = () => {
   process.exit();
 };
