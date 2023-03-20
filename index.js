@@ -10,8 +10,8 @@ const db = mysql.createConnection(
     // TODO: Add MySQL password
     password: "root",
     database: "employeeTracker_db",
-  },
-  console.log(`Connected to the 'employeeTracker_db' database.`)
+  }
+  // console.log(`Connected to the 'employeeTracker_db' database.`)
 );
 
 function start() {
@@ -69,12 +69,12 @@ function start() {
           addRole();
           break;
         // Add an employee
-        case "Add a department":
-          addDepartment();
+        case "Add an employee":
+          addEmployee();
           break;
         // Update employee role
         case "Update an employee role":
-          addDepartment();
+          updateEmployee();
           break;
 
         // Exit the program
@@ -148,6 +148,70 @@ const addRole = () => {
       });
   });
 };
+
+// Add an employee function
+const addEmployee = () => {
+  // query roles
+  db.query(
+    "SELECT id AS value, title AS name FROM roles",
+    (err, roleResults) => {
+      err ? console.log(err) : console.log("/n");
+
+      console.log(roleResults);
+
+      // query managers
+      db.query(
+        `SELECT CONCAT(first_name, " ", last_name) AS name, id AS value FROM employees WHERE manager_id is null`,
+        (err, managerResults) => {
+          err ? console.log(err) : console.log("/n");
+
+          console.table(managerResults);
+
+          inquirer
+            .prompt([
+              {
+                type: "input",
+                message: "What is the first name of the new employee?",
+                name: "first_name",
+              },
+              {
+                type: "input",
+                message: "What is the last name of the new employee?",
+                name: "last_name",
+              },
+              {
+                type: "list",
+                message: "What is the role of the new employee?",
+                name: "roles_id",
+                choices: roleResults,
+              },
+              {
+                type: "list",
+                message: "Who is the manager of the new employee?",
+                name: "manager_id",
+                choices: managerResults,
+              },
+            ])
+            .then(({ first_name, last_name, roles_id, manager_id }) => {
+              db.query(
+                `INSERT INTO employees (first_name, last_name, roles_id, manager_id) VALUES ("${first_name}", "${last_name}", "${roles_id}", "${manager_id}")`,
+                (err, results) => {
+                  if (err) {
+                    throw err;
+                  }
+                  console.log("The new employee has been added.");
+                  start();
+                }
+              );
+            });
+        }
+      );
+    }
+  );
+};
+
+// Update an Employee
+updateEmployee();
 
 const exit = () => {
   process.exit();
